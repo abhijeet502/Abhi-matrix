@@ -3,93 +3,98 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>PulseMatrix X — Dashboard • Abhi</title>
+  <title>PulseMatrix X — Abhi</title>
 
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Chart.js CDN (must load before charts.js) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
 
-  <!-- main style -->
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <canvas id="particles-canvas" class="overlay-canvas"></canvas>
+  <!-- subtle particle canvas background -->
+  <canvas id="particles-canvas" class="bg-canvas" aria-hidden></canvas>
 
-  <div id="ui">
-    <header class="hero">
+  <div id="app" class="wrap">
+    <header class="topbar">
       <div class="brand">
-        <div class="logo">PMX</div>
-        <div class="title">
+        <div class="logo" aria-hidden>PMX</div>
+        <div class="titles">
           <h1>PulseMatrix X</h1>
-          <p class="subtitle">Real-time system dashboard — demo UI by Abhi</p>
+          <p class="subtitle">Professional system dashboard — crafted with 💖 by Abhi</p>
         </div>
       </div>
 
-      <div class="status-row">
-        <div class="status-card">
-          <div class="label">System Clock</div>
-          <div id="sys-clock" class="big">--:--:--</div>
-        </div>
-        <div class="status-card">
-          <div class="label">Uptime</div>
-          <div id="uptime" class="big">0d 0h 0m</div>
-        </div>
-        <div class="status-card">
-          <div class="label">Load</div>
-          <div id="load" class="big">0.0</div>
-        </div>
+      <div class="status" aria-hidden>
+        <div class="stat"><small>Clock</small><div id="clock">--:--:--</div></div>
+        <div class="stat"><small>Uptime</small><div id="uptime">0d 0h 0m</div></div>
+        <div class="stat"><small>Load</small><div id="load">0.00</div></div>
       </div>
     </header>
 
-    <main class="container">
-      <section class="panel">
-        <h2>System Overview</h2>
-        <div class="panel-grid">
-          <div class="card large-chart">
-            <canvas id="cpuChart"></canvas>
+    <main class="grid">
+      <section class="col-left">
+        <div class="card charts">
+          <div class="chart-row">
+            <div class="chart-card">
+              <h3>CPU</h3>
+              <canvas id="cpuChart"></canvas>
+            </div>
+            <div class="chart-card">
+              <h3>Network</h3>
+              <canvas id="netChart"></canvas>
+            </div>
           </div>
+        </div>
 
-          <div class="card small-cards">
-            <div class="mini-card">
-              <div class="mini-label">Memory</div>
-              <div id="mem-value">--%</div>
-            </div>
-            <div class="mini-card">
-              <div class="mini-label">Net</div>
-              <div id="net-value">-- kb/s</div>
-            </div>
-            <div class="mini-card">
-              <div class="mini-label">DB IO</div>
-              <div id="db-value">-- i/s</div>
-            </div>
+        <div class="card logs">
+          <h3>Activity Logs</h3>
+          <div id="logBox" class="logbox" aria-live="polite"></div>
+          <div class="log-controls">
+            <button id="manualRefresh" class="btn">Refresh</button>
+            <button id="toggleSim" class="btn ghost">Pause</button>
+            <button id="clearLogs" class="btn danger">Clear</button>
           </div>
         </div>
       </section>
 
-      <section class="panel">
-        <h2>Activity Logs</h2>
-        <div id="logs" class="logs" aria-live="polite"></div>
-      </section>
+      <aside class="col-right">
+        <div class="card controls">
+          <h3>Control Hub</h3>
+          <div class="controls-row">
+            <button id="btnRefresh" class="btn">Refresh Data</button>
+            <button id="btnQuantum" class="btn ghost">Toggle Quantum</button>
+            <button id="btnExport" class="btn ghost">Export Snapshot</button>
+          </div>
 
-      <section class="panel">
-        <h2>Control Hub</h2>
-        <div class="controls">
-          <button id="btn-refresh" class="btn">Manual refresh</button>
-          <button id="btn-simulate" class="btn alt">Toggle simulation</button>
-          <div class="hint">Tip: type <code>matrix</code> or <code>abhi</code> anywhere for surprises.</div>
+          <div class="command">
+            <input id="cmdInput" placeholder="Type: quantum / abhi / sudo / matrix" />
+            <button id="cmdRun" class="btn">Run</button>
+          </div>
+          <p class="hint">Tip: press <code>/</code> to focus the command input</p>
         </div>
-      </section>
+
+        <div class="card info">
+          <h3>Session</h3>
+          <p><strong>Online</strong> · Demo Mode</p>
+          <p class="hint">Connections: simulated · Data: local</p>
+        </div>
+      </aside>
     </main>
 
     <footer class="site-footer">
-      <div class="left">Project <strong>PulseMatrix X</strong> © <span id="year"></span> — Crafted with ❤️ by Abhi</div>
-      <div class="right small">abhi-pulsematrix-x</div>
+      <div>© <span id="year"></span> — crafted with 💖 by Abhi</div>
+      <div class="repo">abhi-pulsematrix-x</div>
     </footer>
   </div>
 
-  <!-- easter overlays -->
-  <div id="matrix-overlay" class="easter-overlay hidden"></div>
-  <div id="abhi-toast" class="toast hidden">Hello — Lex-01 reports: System initialized by Abhi 🎀✨</div>
+  <!-- overlays -->
+  <div id="matrixOverlay" class="overlay hidden" aria-hidden="true"></div>
+  <div id="abhiToast" class="toast hidden">Hello — Lex-01 reports: System initialized by Abhi 🎀✨</div>
 
+  <!-- JS modules (load order: particles -> charts -> logs -> main) -->
+  <script src="particles.js" defer></script>
+  <script src="charts.js" defer></script>
+  <script src="logs.js" defer></script>
   <script src="script.js" defer></script>
 </body>
 </html>
