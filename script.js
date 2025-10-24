@@ -1,6 +1,8 @@
+// PulseMatrix X — script.js
+// No external API keys required. All data simulated locally for demo.
+
 // ==== Utilities ====
 const $ = (sel) => document.querySelector(sel);
-const $$ = (sel) => document.querySelectorAll(sel);
 
 // ====== Particle background (canvas) ======
 (() => {
@@ -12,7 +14,6 @@ const $$ = (sel) => document.querySelectorAll(sel);
   const particleCount = Math.max(20, Math.floor((w*h)/80000));
 
   function rand(min,max){return Math.random()*(max-min)+min}
-
   function resize(){ w = canvas.width = innerWidth; h = canvas.height = innerHeight; }
   addEventListener('resize',resize);
 
@@ -24,7 +25,7 @@ const $$ = (sel) => document.querySelectorAll(sel);
       this.vy = rand(-0.35,0.35);
       this.r = rand(0.6,2.2);
       this.life = rand(60,240);
-      this.h = Math.floor(rand(170,300));
+      this.h = Math.floor(rand(170,300)); // hue-ish
     }
     step(){
       this.x += this.vx;
@@ -48,12 +49,14 @@ const $$ = (sel) => document.querySelectorAll(sel);
 
   function loop(){
     ctx.clearRect(0,0,w,h);
+    // subtle radial gradient
     const g = ctx.createLinearGradient(0,0,w,h);
     g.addColorStop(0,'rgba(20,28,41,0.05)');
     g.addColorStop(1,'rgba(8,12,18,0.08)');
     ctx.fillStyle = g;
-    ctx.fillRect(0,0,w,h);
+    ctx.fillRect(0, 0, w, h);
 
+    // neon grid lines
     ctx.strokeStyle = 'rgba(60,180,220,0.03)';
     ctx.lineWidth = 1;
     for(let x=0;x<w;x+=80){
@@ -63,6 +66,7 @@ const $$ = (sel) => document.querySelectorAll(sel);
       ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke();
     }
 
+    // draw particles
     particles.forEach(p => { p.step(); p.draw(); });
 
     requestAnimationFrame(loop);
@@ -130,14 +134,17 @@ const chart = new Chart(ctx, {
   }
 });
 
+// update chart data every 1.2s
 setInterval(()=>{
-  chart.data.labels.push(new Date().toLocaleTimeString().split(' ')[0].replace(/:d+$/,''));
+  chart.data.labels.push(new Date().toLocaleTimeString().split(' ')[0].replace(/:\d+$/,''));
   chart.data.labels.shift();
+  // push new randoms
   chart.data.datasets[0].data.push(Math.max(5, Math.min(95, (chart.data.datasets[0].data.at(-1) || 30) + (Math.random()-0.5)*12)));
   chart.data.datasets[0].data.shift();
   chart.data.datasets[1].data.push(Math.max(2, Math.abs((chart.data.datasets[1].data.at(-1) || 40) + (Math.random()-0.5)*120)));
   chart.data.datasets[1].data.shift();
   chart.update('none');
+  // also update mini metrics
   $('#mem-value').textContent = `${Math.floor(Math.random()*70+15)}%`;
   $('#net-value').textContent = `${Math.floor(Math.random()*900)} kb/s`;
   $('#db-value').textContent = `${Math.floor(Math.random()*200)} i/s`;
@@ -156,7 +163,7 @@ const sampleActions = [
   "cache: eviction policy triggered 3 keys",
   "io: disk write 42MB/s"
 ];
-function appendLog(text, level='info'){
+function appendLog(text){
   const el = document.createElement('div');
   const t = new Date().toLocaleTimeString();
   el.textContent = `[${t}] ${text}`;
@@ -164,10 +171,12 @@ function appendLog(text, level='info'){
   el.style.transition = 'opacity 0.25s';
   logsEl.prepend(el);
   setTimeout(()=>el.style.opacity=1,30);
+  // keep log length bounded
   while(logsEl.children.length > 80) logsEl.removeChild(logsEl.lastChild);
 }
 setInterval(()=> appendLog(sampleActions[Math.floor(Math.random()*sampleActions.length)]), 1400);
 
+// manual controls
 $('#btn-refresh').addEventListener('click', () => {
   appendLog('manual: metrics refreshed by user');
   document.querySelectorAll('.panel').forEach(p => p.animate([{transform:'scale(1)'},{transform:'scale(1.01)'},{transform:'scale(1)'}], {duration:380, easing:'ease-out'}));
@@ -176,7 +185,7 @@ $('#btn-refresh').addEventListener('click', () => {
 let simOn = true;
 $('#btn-simulate').addEventListener('click', () => {
   simOn = !simOn;
-  $('#btn-simulate').textContent = simOn ? 'Toggle simulation (on)' : 'Toggle simulation (off)';
+  $('#btn-simulate').textContent = simOn ? 'Toggle simulation' : 'Simulation paused';
   appendLog(`simulation ${simOn ? 'resumed' : 'paused'}`);
 });
 
@@ -187,15 +196,12 @@ const triggers = {
     showMatrix();
     appendLog('easter: matrix rain activated');
   },
-  'core': () => {
-    showCore();
-    appendLog('easter: core overload activated');
-  },
   'abhi': () => {
     showAbhi();
     appendLog('easter: abhi greeting triggered');
   }
 };
+
 addEventListener('keydown', (e) => {
   if(e.key.length === 1) {
     keyBuffer += e.key.toLowerCase();
@@ -211,6 +217,8 @@ function showMatrix(){
   hideAllEaster();
   const overlay = $('#matrix-overlay');
   overlay.classList.remove('hidden');
+
+  // create canvas for rain
   overlay.innerHTML = '<canvas id="matrix-canvas"></canvas>';
   const c = overlay.querySelector('canvas');
   c.width = innerWidth; c.height = innerHeight;
@@ -232,26 +240,9 @@ function showMatrix(){
     if(!overlay.classList.contains('hidden')) requestAnimationFrame(draw);
   }
   draw();
+  // auto hide after 9s
   setTimeout(()=> overlay.classList.add('hidden'),9000);
 }
-
-// ===== CORE overlay =====
-function showCore(){
-  hideAllEaster();
-  const overlay = $('#core-overlay');
-  overlay.classList.remove('hidden');
-  setTimeout(()=>overlay.classList.add('hidden'), 7000);
-}
-
-// ENSURE THE CLOSE BUTTON WORKS
-document.addEventListener('DOMContentLoaded', function () {
-  const closeBtn = document.getElementById('close-core');
-  if (closeBtn) {
-    closeBtn.addEventListener('click', function () {
-      document.getElementById('core-overlay').classList.add('hidden');
-    });
-  }
-});
 
 // ===== ABHI toast (speech) =====
 function showAbhi(){
@@ -267,21 +258,23 @@ function showAbhi(){
 
 function hideAllEaster(){
   $('#matrix-overlay').classList.add('hidden');
-  $('#core-overlay').classList.add('hidden');
   $('#abhi-toast').classList.add('hidden');
   const mc = $('#matrix-overlay canvas');
   if(mc) mc.remove();
 }
 
-// ====== Initialization banner ======
+// ====== Initialization banner (simulated heavy startup) ======
 (function initSequence(){
-  appendLog('system: initializing PulseMatrix Aurora engine');
+  appendLog('system: initializing PulseMatrix engine');
   appendLog('system: loading telemetry modules');
   appendLog('system: initializing chart stream');
   setTimeout(()=> appendLog('system: startup complete'), 1600);
 })();
 
-$('#year').textContent = new Date().getFullYear();
+// set year in footer
+document.getElementById('year').textContent = new Date().getFullYear();
+
+// keep UI responsive on mobile height changes
 addEventListener('resize', () => {
   const c = document.getElementById('particles-canvas');
   c.width = innerWidth; c.height = innerHeight;
