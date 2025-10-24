@@ -110,6 +110,13 @@ body{
 
 .toast{ position:fixed; bottom:36px; right:36px; background:linear-gradient(90deg,var(--neon-b),var(--accent)); color:#071227; padding:12px 18px; border-radius:10px; font-weight:700; z-index:1200; box-shadow:0 10px 30px rgba(0,0,0,0.6) }
 
+/* fix for clickable overlay and close button */
+#core-overlay,
+#core-overlay .core-box,
+#close-core {
+  pointer-events: auto !important;
+}
+
 /* small screens */
 @media (max-width:900px){
   .panel-grid{ grid-template-columns: 1fr; }
