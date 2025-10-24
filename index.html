@@ -4,14 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>PulseMatrix X — Dashboard • Abhi</title>
-
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <canvas id="particles-canvas" class="overlay-canvas"></canvas>
-
   <div id="ui">
     <header class="hero">
       <div class="brand">
@@ -21,7 +19,6 @@
           <p class="subtitle">Real-time system dashboard — demo UI by Abhi</p>
         </div>
       </div>
-
       <div class="status-row">
         <div class="status-card">
           <div class="label">System Clock</div>
@@ -37,7 +34,6 @@
         </div>
       </div>
     </header>
-
     <main class="container">
       <section class="panel">
         <h2>System Overview</h2>
@@ -45,7 +41,6 @@
           <div class="card large-chart">
             <canvas id="cpuChart"></canvas>
           </div>
-
           <div class="card small-cards">
             <div class="mini-card">
               <div class="mini-label">Memory</div>
@@ -62,12 +57,10 @@
           </div>
         </div>
       </section>
-
       <section class="panel">
         <h2>Activity Logs</h2>
         <div id="logs" class="logs" aria-live="polite"></div>
       </section>
-
       <section class="panel">
         <h2>Control Hub</h2>
         <div class="controls">
@@ -77,13 +70,11 @@
         </div>
       </section>
     </main>
-
     <footer class="site-footer">
       <div class="left">© <span id="year"></span> Crafted with ❤️ by Abhi</div>
       <div class="right small">PulseMatrix X — Demo UI</div>
     </footer>
   </div>
-
   <!-- easter overlays -->
   <div id="matrix-overlay" class="easter-overlay hidden"></div>
   <div id="core-overlay" class="easter-overlay hidden">
@@ -93,7 +84,6 @@
     </div>
   </div>
   <div id="abhi-toast" class="toast hidden">Hello — Lex-01 reports: System initialized by Abhi 🎀✨</div>
-
   <script src="script.js" defer></script>
 </body>
 </html>
