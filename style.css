@@ -1,13 +1,9 @@
-/* PulseMatrix X — style.css
-   Keep the theme dark + neon.
-*/
-
 :root{
   --bg1:#071227;
   --bg2:#07162a;
-  --neon-a:#38bdf8; /* cyan */
-  --neon-b:#a78bfa; /* purple */
-  --accent:#f472b6; /* pink */
+  --neon-a:#38bdf8;
+  --neon-b:#a78bfa;
+  --accent:#f472b6;
   --card: rgba(255,255,255,0.03);
   --glass: rgba(255,255,255,0.04);
   --muted: #94a3b8;
@@ -105,19 +101,9 @@ body{
 .easter-overlay.hidden{ display:none; pointer-events:none; }
 #matrix-overlay{ background:rgba(0,0,0,0.95); color:#00ff41; font-family: "Courier New", monospace; overflow:hidden; }
 #matrix-overlay canvas{ width:100%; height:100% }
-#core-overlay{ background:linear-gradient(180deg, rgba(180,18,60,0.92), rgba(90,12,24,0.92)); color:#ffd5d5; display:flex; align-items:center; justify-content:center; }
-.core-box{ background:rgba(0,0,0,0.25); padding:28px 32px; border-radius:10px; border:1px solid rgba(255,255,255,0.05); box-shadow:0 10px 40px rgba(0,0,0,0.6); font-size:20px; font-weight:800; text-transform:uppercase; letter-spacing:1px; }
-
 .toast{ position:fixed; bottom:36px; right:36px; background:linear-gradient(90deg,var(--neon-b),var(--accent)); color:#071227; padding:12px 18px; border-radius:10px; font-weight:700; z-index:1200; box-shadow:0 10px 30px rgba(0,0,0,0.6) }
 
-/* fix for clickable overlay and close button */
-#core-overlay,
-#core-overlay .core-box,
-#close-core {
-  pointer-events: auto !important;
-}
-
-/* small screens */
+/* responsive */
 @media (max-width:900px){
   .panel-grid{ grid-template-columns: 1fr; }
   .hero{ padding:22px }
