@@ -240,15 +240,17 @@ function showCore(){
   hideAllEaster();
   const overlay = $('#core-overlay');
   overlay.classList.remove('hidden');
-  // Always remove after 7 seconds for safety!
-  setTimeout(()=>{
-    overlay.classList.add('hidden');
-  }, 7000);
+  setTimeout(()=>overlay.classList.add('hidden'), 7000);
 }
 
-// Manual close button always available:
-$('#close-core').addEventListener('click', () => {
-  $('#core-overlay').classList.add('hidden');
+// ENSURE THE CLOSE BUTTON WORKS
+document.addEventListener('DOMContentLoaded', function () {
+  const closeBtn = document.getElementById('close-core');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', function () {
+      document.getElementById('core-overlay').classList.add('hidden');
+    });
+  }
 });
 
 // ===== ABHI toast (speech) =====
@@ -284,4 +286,3 @@ addEventListener('resize', () => {
   const c = document.getElementById('particles-canvas');
   c.width = innerWidth; c.height = innerHeight;
 });
-// === end of script ===
