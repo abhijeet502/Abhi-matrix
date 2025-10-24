@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PulseMatrix X — Dashboard • Abhi</title>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- main style -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <canvas id="particles-canvas" class="overlay-canvas"></canvas>
+
+  <div id="ui">
+    <header class="hero">
+      <div class="brand">
+        <div class="logo">PMX</div>
+        <div class="title">
+          <h1>PulseMatrix X</h1>
+          <p class="subtitle">Real-time system dashboard — demo UI by Abhi</p>
+        </div>
+      </div>
+
+      <div class="status-row">
+        <div class="status-card">
+          <div class="label">System Clock</div>
+          <div id="sys-clock" class="big">--:--:--</div>
+        </div>
+        <div class="status-card">
+          <div class="label">Uptime</div>
+          <div id="uptime" class="big">0d 0h 0m</div>
+        </div>
+        <div class="status-card">
+          <div class="label">Load</div>
+          <div id="load" class="big">0.0</div>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="panel">
+        <h2>System Overview</h2>
+        <div class="panel-grid">
+          <div class="card large-chart">
+            <canvas id="cpuChart"></canvas>
+          </div>
+
+          <div class="card small-cards">
+            <div class="mini-card">
+              <div class="mini-label">Memory</div>
+              <div id="mem-value">--%</div>
+            </div>
+            <div class="mini-card">
+              <div class="mini-label">Net</div>
+              <div id="net-value">-- kb/s</div>
+            </div>
+            <div class="mini-card">
+              <div class="mini-label">DB IO</div>
+              <div id="db-value">-- i/s</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Activity Logs</h2>
+        <div id="logs" class="logs" aria-live="polite"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Control Hub</h2>
+        <div class="controls">
+          <button id="btn-refresh" class="btn">Manual refresh</button>
+          <button id="btn-simulate" class="btn alt">Toggle simulation</button>
+          <div class="hint">Tip: type <code>matrix</code>, <code>core</code> or <code>abhi</code> anywhere for surprises.</div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="left">© <span id="year"></span> Crafted with ❤️ by Abhi</div>
+      <div class="right small">PulseMatrix X — Demo UI</div>
+    </footer>
+  </div>
+
+  <!-- easter overlays -->
+  <div id="matrix-overlay" class="easter-overlay hidden"></div>
+  <div id="core-overlay" class="easter-overlay hidden">
+    <div class="core-box">CORE OVERLOAD — REBOOTING...</div>
+  </div>
+  <div id="abhi-toast" class="toast hidden">Hello — Lex-01 reports: System initialized by Abhi 🎀✨</div>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
