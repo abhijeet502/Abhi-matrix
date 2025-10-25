@@ -3,24 +3,26 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>PulseMatrix X — Abhi</title>
+  <title>PulseMatrix X — Abhi (Advanced)</title>
 
-  <!-- Chart.js CDN (must load before charts.js) -->
+  <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
+  <!-- three.js CDN for aurora -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js" defer></script>
 
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- subtle particle canvas background -->
   <canvas id="particles-canvas" class="bg-canvas" aria-hidden></canvas>
+  <div id="aurora" class="bg-aurora" aria-hidden></div>
 
-  <div id="app" class="wrap">
-    <header class="topbar">
+  <div id="app" class="wrap" role="main" aria-label="PulseMatrix dashboard">
+    <header class="topbar" role="banner">
       <div class="brand">
         <div class="logo" aria-hidden>PMX</div>
         <div class="titles">
           <h1>PulseMatrix X</h1>
-          <p class="subtitle">Professional system dashboard — crafted with 💖 by Abhi</p>
+          <p class="subtitle">Professional real-time dashboard — crafted with 💖 by Abhi</p>
         </div>
       </div>
 
@@ -31,68 +33,92 @@
       </div>
     </header>
 
-    <main class="grid">
-      <section class="col-left">
-        <div class="card charts">
+    <main class="grid" role="main">
+      <section class="col-left" aria-label="Left column">
+        <div class="card charts" aria-label="Charts">
           <div class="chart-row">
             <div class="chart-card">
               <h3>CPU</h3>
-              <canvas id="cpuChart"></canvas>
+              <canvas id="cpuChart" aria-label="CPU chart"></canvas>
             </div>
             <div class="chart-card">
               <h3>Network</h3>
-              <canvas id="netChart"></canvas>
+              <canvas id="netChart" aria-label="Network chart"></canvas>
+            </div>
+          </div>
+          <div class="chart-row lower">
+            <div class="chart-card">
+              <h3>Memory</h3>
+              <canvas id="memChart"></canvas>
+            </div>
+            <div class="chart-card">
+              <h3>Throughput</h3>
+              <canvas id="throughChart"></canvas>
             </div>
           </div>
         </div>
 
-        <div class="card logs">
+        <div class="card logs" aria-label="Activity logs">
           <h3>Activity Logs</h3>
           <div id="logBox" class="logbox" aria-live="polite"></div>
           <div class="log-controls">
             <button id="manualRefresh" class="btn">Refresh</button>
             <button id="toggleSim" class="btn ghost">Pause</button>
             <button id="clearLogs" class="btn danger">Clear</button>
+            <button id="exportLogs" class="btn ghost">Export</button>
           </div>
         </div>
       </section>
 
-      <aside class="col-right">
-        <div class="card controls">
+      <aside class="col-right" aria-label="Right column">
+        <div class="card controls" aria-label="Control hub">
           <h3>Control Hub</h3>
           <div class="controls-row">
             <button id="btnRefresh" class="btn">Refresh Data</button>
             <button id="btnQuantum" class="btn ghost">Toggle Quantum</button>
-            <button id="btnExport" class="btn ghost">Export Snapshot</button>
+            <button id="btnWorker" class="btn ghost">Start Worker</button>
           </div>
 
           <div class="command">
-            <input id="cmdInput" placeholder="Type: quantum / abhi / sudo / matrix" />
+            <input id="cmdInput" placeholder="Say or type: matrix / abhi / core / pulse / reboot" aria-label="Command input" />
             <button id="cmdRun" class="btn">Run</button>
           </div>
-          <p class="hint">Tip: press <code>/</code> to focus the command input</p>
+          <p class="hint">Tip: press <code>/</code> to focus. Try speaking: “Hey Lex, show matrix”.</p>
+
+          <div class="voice-controls">
+            <button id="voiceStart" class="btn">🎤 Voice Mode</button>
+            <div id="voiceStatus" class="hint" aria-live="polite">Voice: off</div>
+          </div>
         </div>
 
-        <div class="card info">
+        <div class="card info" aria-label="Session info">
           <h3>Session</h3>
           <p><strong>Online</strong> · Demo Mode</p>
           <p class="hint">Connections: simulated · Data: local</p>
+          <div style="margin-top:10px;">
+            <button id="snapshot" class="btn">Download Snapshot</button>
+          </div>
         </div>
       </aside>
     </main>
 
-    <footer class="site-footer">
+    <footer class="site-footer" role="contentinfo">
       <div>© <span id="year"></span> — crafted with 💖 by Abhi</div>
       <div class="repo">abhi-pulsematrix-x</div>
     </footer>
   </div>
 
-  <!-- overlays -->
+  <!-- overlays & easter UI -->
   <div id="matrixOverlay" class="overlay hidden" aria-hidden="true"></div>
-  <div id="abhiToast" class="toast hidden">Hello — Lex-01 reports: System initialized by Abhi 🎀✨</div>
+  <div id="coreOverlay" class="overlay hidden" aria-hidden="true"></div>
+  <div id="abhiToast" class="toast hidden" role="status">Hello — Lex-01 reports: System initialized by Abhi 🎀✨</div>
 
-  <!-- JS modules (load order: particles -> charts -> logs -> main) -->
+  <!-- worker script (for heavy simulation) -->
+  <script src="worker.js" defer></script>
+
+  <!-- modules -->
   <script src="particles.js" defer></script>
+  <script src="three-aurora.js" defer></script>
   <script src="charts.js" defer></script>
   <script src="logs.js" defer></script>
   <script src="script.js" defer></script>
