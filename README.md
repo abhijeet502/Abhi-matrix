@@ -1,29 +1,31 @@
-# abhi-pulsematrix-x
+# abhi-pulsematrix-x (Advanced)
 
-PulseMatrix X — demo professional dashboard by Abhijeet (Abhi).
+PulseMatrix X — advanced demo dashboard by Abhijeet (Abhi).
 
-## Files
+Files:
 - index.html
 - style.css
 - particles.js
+- three-aurora.js
 - charts.js
 - logs.js
 - script.js
+- worker.js (embedded inline by script.js)
 
-## Deploy (Quick)
-1. Create a new GitHub repo (e.g. `abhi-pulsematrix-x`).
-2. Add the files above to the repository root (use GitHub web: Add file → Create new file or Upload files).
-3. Go to [Vercel](https://vercel.com) → New Project → Import Git Repository → select this repo.
-   - Framework Preset: **Other**
-   - Root Directory: `./`
-4. Click **Deploy**. After deploy open the provided URL.
+Quick deploy:
+1. Create GitHub repo (e.g. `abhi-pulsematrix-x`).
+2. Add these files to repo root (use GitHub web UI).
+3. Go to Vercel → New Project → Import repo → Framework: **Other** → Deploy.
+4. Open your Vercel URL.
 
-## Notes
-- All data is simulated locally — no API keys or billing needed.
-- Easter eggs (type or press keys):
-  - `matrix` → falling green code overlay
-  - `abhi` → voice greeting + toast
-  - `quantum` → toggles subtle visual accent
-- If a page is blank after deploy: ensure `index.html` is at repo root and filenames match (case-sensitive).
+Notes:
+- Voice commands: press 🎤 Voice Mode and speak. Supported commands: `matrix`, `abhi`, `core`, `pulse`, `reboot`.
+- Easter eggs available via keyboard typing too.
+- Worker simulates heavy work to show “server-like” activity.
+- No API keys or billing required for demo behavior.
 
-Enjoy — crafted with 💖 by Abhi.
+**C# / Blazor integration (optional):**
+- To later add true C# logic in-browser, use **Blazor WebAssembly** (requires .NET SDK to build). Host compiled Blazor outputs in a subfolder and reference them from `index.html`.
+- If you want, I can provide a short guide to create a small Blazor WASM module and integrate it.
+
+Enjoy — crafted with ❤️ by Abhi
