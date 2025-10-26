@@ -1,126 +1,169 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>PulseMatrix X — Abhi (Advanced)</title>
+  <title>AURORA OS — Crafted with 💖 by Abhi</title>
 
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
-  <!-- three.js CDN for aurora -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js" defer></script>
+  <!-- libs (CDN) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.153.0/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
-  <link rel="stylesheet" href="style.css">
+  <!-- styles -->
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-  <canvas id="particles-canvas" class="bg-canvas" aria-hidden></canvas>
-  <div id="aurora" class="bg-aurora" aria-hidden></div>
+<body class="theme-aurora">
 
-  <div id="app" class="wrap" role="main" aria-label="PulseMatrix dashboard">
-    <header class="topbar" role="banner">
+  <!-- BOOT SCREEN -->
+  <div id="boot-screen" aria-hidden="false">
+    <div class="boot-inner">
+      <div class="brand-large">
+        <div class="logo-dot"></div>
+        <div class="brand-text">AURORA OS</div>
+      </div>
+      <div class="boot-msg">Initializing subsystems…</div>
+      <div class="boot-bar"><div id="boot-progress"></div></div>
+      <div class="boot-sub">Crafted with 💖 by Abhi</div>
+    </div>
+  </div>
+
+  <!-- APP SHELL -->
+  <div id="app" aria-hidden="true">
+    <nav class="topbar glass" role="navigation">
       <div class="brand">
-        <div class="logo" aria-hidden>PMX</div>
-        <div class="titles">
-          <h1>PulseMatrix X</h1>
-          <p class="subtitle">Professional real-time dashboard — crafted with 💖 by Abhi</p>
+        <div class="logo-dot"></div>
+        <div>
+          <div class="title">AURORA OS</div>
+          <div class="subtitle">Living Interface — Abhi</div>
         </div>
       </div>
 
-      <div class="status" aria-hidden>
-        <div class="stat"><small>Clock</small><div id="clock">--:--:--</div></div>
-        <div class="stat"><small>Uptime</small><div id="uptime">0d 0h 0m</div></div>
-        <div class="stat"><small>Load</small><div id="load">0.00</div></div>
+      <div class="controls" role="menubar" aria-label="controls">
+        <button id="voice-btn" class="control-btn" aria-pressed="false" title="Voice (Alt+V)">🎙️ Talk</button>
+        <select id="theme-select" class="control-select" title="Theme selector">
+          <option value="aurora">Aurora</option>
+          <option value="glass">Glass</option>
+          <option value="midnight">Midnight</option>
+          <option value="ocean">Ocean</option>
+        </select>
+        <button id="settings-btn" class="control-btn" title="Settings">⚙️</button>
       </div>
-    </header>
+    </nav>
 
-    <main class="grid" role="main">
-      <section class="col-left" aria-label="Left column">
-        <div class="card charts" aria-label="Charts">
-          <div class="chart-row">
-            <div class="chart-card">
-              <h3>CPU</h3>
-              <canvas id="cpuChart" aria-label="CPU chart"></canvas>
-            </div>
-            <div class="chart-card">
-              <h3>Network</h3>
-              <canvas id="netChart" aria-label="Network chart"></canvas>
-            </div>
+    <main class="main-grid" role="main">
+      <!-- Left column: Core 3D + node map -->
+      <section class="panel glass core-panel" aria-labelledby="coreHeading">
+        <h2 id="coreHeading">System Core</h2>
+        <div id="core-canvas-wrap">
+          <canvas id="three-canvas" aria-hidden="true"></canvas>
+        </div>
+
+        <div class="core-row">
+          <div class="core-status">
+            <div>Mode: <strong id="core-mode">Idle</strong></div>
+            <div id="uptime">Uptime: —</div>
           </div>
-          <div class="chart-row lower">
-            <div class="chart-card">
-              <h3>Memory</h3>
-              <canvas id="memChart"></canvas>
-            </div>
-            <div class="chart-card">
-              <h3>Throughput</h3>
-              <canvas id="throughChart"></canvas>
-            </div>
+          <div class="core-controls">
+            <div id="voice-level" class="level-indicator" aria-hidden="true"><span></span></div>
+            <button id="btn-boot-sound" class="mini-btn">🔊 Boot sound</button>
           </div>
         </div>
 
-        <div class="card logs" aria-label="Activity logs">
-          <h3>Activity Logs</h3>
-          <div id="logBox" class="logbox" aria-live="polite"></div>
-          <div class="log-controls">
-            <button id="manualRefresh" class="btn">Refresh</button>
-            <button id="toggleSim" class="btn ghost">Pause</button>
-            <button id="clearLogs" class="btn danger">Clear</button>
-            <button id="exportLogs" class="btn ghost">Export</button>
-          </div>
+        <div class="node-map glass" id="node-map" aria-hidden="false">
+          <svg viewBox="0 0 400 140" preserveAspectRatio="xMidYMid meet" id="node-svg" role="img" aria-label="node map"></svg>
         </div>
       </section>
 
-      <aside class="col-right" aria-label="Right column">
-        <div class="card controls" aria-label="Control hub">
-          <h3>Control Hub</h3>
-          <div class="controls-row">
-            <button id="btnRefresh" class="btn">Refresh Data</button>
-            <button id="btnQuantum" class="btn ghost">Toggle Quantum</button>
-            <button id="btnWorker" class="btn ghost">Start Worker</button>
-          </div>
+      <!-- Middle column: Metrics & graphs -->
+      <section class="panel glass metrics-panel" aria-labelledby="metricsHeading">
+        <h2 id="metricsHeading">Live Monitor</h2>
 
-          <div class="command">
-            <input id="cmdInput" placeholder="Say or type: matrix / abhi / core / pulse / reboot" aria-label="Command input" />
-            <button id="cmdRun" class="btn">Run</button>
+        <div class="metrics-row">
+          <div class="metric">
+            <div class="metric-label">CPU</div>
+            <div class="metric-value" id="cpu-value">—%</div>
+            <div class="metric-bar"><div id="cpu-bar"></div></div>
           </div>
-          <p class="hint">Tip: press <code>/</code> to focus. Try speaking: “Hey Lex, show matrix”.</p>
-
-          <div class="voice-controls">
-            <button id="voiceStart" class="btn">🎤 Voice Mode</button>
-            <div id="voiceStatus" class="hint" aria-live="polite">Voice: off</div>
+          <div class="metric">
+            <div class="metric-label">RAM</div>
+            <div class="metric-value" id="ram-value">—%</div>
+            <div class="metric-bar"><div id="ram-bar"></div></div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">AI Load</div>
+            <div class="metric-value" id="ai-value">—%</div>
+            <div class="metric-bar"><div id="ai-bar"></div></div>
           </div>
         </div>
 
-        <div class="card info" aria-label="Session info">
-          <h3>Session</h3>
-          <p><strong>Online</strong> · Demo Mode</p>
-          <p class="hint">Connections: simulated · Data: local</p>
-          <div style="margin-top:10px;">
-            <button id="snapshot" class="btn">Download Snapshot</button>
+        <div class="charts">
+          <div class="chart-wrap"><canvas id="cpuChart" aria-label="cpu chart"></canvas></div>
+          <div class="chart-wrap"><canvas id="ramChart" aria-label="ram chart"></canvas></div>
+        </div>
+
+        <div class="controls-row">
+          <button id="export-logs" class="control-pill">⬇️ Export logs</button>
+          <button id="clear-logs" class="control-pill danger">🧹 Clear logs</button>
+        </div>
+      </section>
+
+      <!-- Right column: Terminal & chat -->
+      <section class="panel glass terminal-panel" aria-labelledby="termHeading">
+        <h2 id="termHeading">Terminal & Chat</h2>
+
+        <div class="terminal-top">
+          <div class="term-title">System Terminal</div>
+          <div class="term-actions">
+            <button id="reboot-btn" class="small-btn">Reboot</button>
+            <button id="matrix-btn" class="small-btn">Matrix</button>
           </div>
         </div>
-      </aside>
+
+        <div id="log" class="log-area" role="log" aria-live="polite"></div>
+
+        <div class="chat-row">
+          <input id="cmd-input" aria-label="command" placeholder="Type a command or ask LucidCore..." />
+          <button id="cmd-send" class="send-btn">Send</button>
+        </div>
+
+        <div class="chat-hint">Hotkeys: <kbd>Alt+V</kbd> voice, <kbd>Alt+R</kbd> reboot</div>
+      </section>
     </main>
 
-    <footer class="site-footer" role="contentinfo">
-      <div>© <span id="year"></span> — crafted with 💖 by Abhi</div>
-      <div class="repo">abhi-pulsematrix-x</div>
+    <footer class="footer glass" role="contentinfo">
+      <div class="footer-left">Crafted with 💖 by Abhi</div>
+      <div class="footer-right" id="clock">—</div>
     </footer>
+
+    <!-- overlay for visual effects -->
+    <div id="visual-overlay" aria-hidden="true"></div>
+
+    <!-- settings modal -->
+    <div id="settings-modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="modal-inner glass">
+        <h3>Settings</h3>
+        <label>Display name
+          <input id="setting-name" placeholder="Your name (saved locally)" />
+        </label>
+        <label>Animation intensity
+          <input id="setting-intensity" type="range" min="0" max="100" value="60" />
+        </label>
+        <div class="modal-actions">
+          <button id="save-settings" class="control-pill">Save</button>
+          <button id="close-settings" class="control-pill">Close</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 
-  <!-- overlays & easter UI -->
-  <div id="matrixOverlay" class="overlay hidden" aria-hidden="true"></div>
-  <div id="coreOverlay" class="overlay hidden" aria-hidden="true"></div>
-  <div id="abhiToast" class="toast hidden" role="status">Hello — Lex-01 reports: System initialized by Abhi 🎀✨</div>
+  <!-- audio placeholders (you can add actual mp3s in public/sounds and enable) -->
+  <audio id="boot-sound" preload="auto"></audio>
+  <audio id="glitch-sound" preload="auto"></audio>
+  <audio id="ambient-sound" preload="auto"></audio>
 
-  <!-- worker script (for heavy simulation) -->
-  <script src="worker.js" defer></script>
-
-  <!-- modules -->
-  <script src="particles.js" defer></script>
-  <script src="three-aurora.js" defer></script>
-  <script src="charts.js" defer></script>
-  <script src="logs.js" defer></script>
-  <script src="script.js" defer></script>
+  <!-- main script -->
+  <script src="script.js"></script>
 </body>
 </html>
