@@ -1,527 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>MindMirror X — Real-time</title>
-<link rel="icon" href="data:," />
-<style>
-  /* ---------- Base + theme ---------- */
-  :root{
-    --bg-1:#071225; --bg-2:#0f1724;
-    --glass:rgba(255,255,255,0.04);
-    --muted:#94a3b8; --accent-a:#7dd3fc; --accent-b:#a78bfa;
-    --pink:#f472b6; --blue:#60a5fa;
-    --card-radius:14px;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0; font-family:Inter, system-ui, "Segoe UI", Roboto, Arial;
-    background:linear-gradient(180deg,var(--bg-1),var(--bg-2));
-    color:#e6eef8; -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-    overflow-y:auto;
-  }
-
-  /* ---------- header ---------- */
-  header{padding:48px 20px 28px; text-align:left; max-width:980px;margin:0 auto}
-  .brand{display:flex;align-items:center;gap:14px}
-  .logo{
-    width:56px;height:56px;border-radius:12px;
-    background:linear-gradient(135deg,var(--accent-b),var(--accent-a));
-    display:flex;align-items:center;justify-content:center;font-weight:700;color:#012;
-    box-shadow:0 8px 30px rgba(10,15,30,0.6)
-  }
-  h1{font-weight:700;font-size:2.4rem;margin:0;color:#cfe9ff}
-  p.lead{margin:8px 0 0;color:var(--muted);opacity:0.95}
-
-  /* ---------- main layout ---------- */
-  main{max-width:980px;margin:28px auto;padding:0 20px 80px}
-  .grid{display:grid;grid-template-columns:1fr 360px;gap:22px}
-  @media (max-width:980px){.grid{grid-template-columns:1fr} .aside{order:2} }
-
-  /* ---------- glass cards ---------- */
-  .card{
-    background:var(--glass); border-radius:var(--card-radius);
-    padding:18px; box-shadow:0 8px 30px rgba(3,6,15,0.6);
-    backdrop-filter: blur(8px);
-  }
-
-  /* ---------- composer ---------- */
-  .composer{min-height:140px; position:relative; overflow:hidden;}
-  .input{
-    width:100%; height:98px; padding:18px; resize:none;
-    border-radius:10px; border:none; background:rgba(255,255,255,0.02);
-    color:inherit; font-size:1.05rem; outline:none; line-height:1.4;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
-  }
-  .controls{display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap}
-  .btn{
-    background:linear-gradient(90deg,var(--pink),var(--accent-b));
-    color:#031523;padding:10px 14px;border-radius:12px;border:none;
-    font-weight:700;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,0.35);
-  }
-  .btn.secondary{background:linear-gradient(90deg,var(--blue),var(--accent-b)); color:#012}
-  .quick-tags{display:flex;gap:8px; margin-left:6px;flex-wrap:wrap}
-  .tag{background:rgba(255,255,255,0.02);padding:8px 12px;border-radius:999px;color:var(--muted);cursor:pointer}
-
-  /* ---------- mood visualizer ---------- */
-  .spectrum{margin-top:18px}
-  .spectrum .meter{
-    height:12px;border-radius:999px;background:linear-gradient(90deg,#01303a, #05243a);
-    padding:2px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.02);
-  }
-  .spectrum .fill{
-    height:8px;border-radius:999px;width:10%;transition:width 700ms cubic-bezier(.2,.9,.2,1);
-    background:linear-gradient(90deg,#34d399,#60a5fa,#a78bfa); box-shadow:0 6px 20px rgba(80,150,180,0.12);
-  }
-  .spectrum .label{margin-top:10px;color:var(--muted)}
-
-  /* ---------- reflection box + logs ---------- */
-  .reflection-area{margin-top:20px; min-height:120px; border-radius:12px;padding:14px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent)}
-  .logs{height:220px;overflow:auto;padding:12px;font-family:monospace;background:rgba(0,0,0,0.06);margin-top:12px;border-radius:10px;color:#cfe9ff}
-
-  /* ---------- aside ---------- */
-  .aside .card{position:sticky; top:28px}
-  .small{font-size:0.9rem;color:var(--muted)}
-
-  /* ---------- easter overlays ---------- */
-  .overlay{
-    position:fixed; inset:0; z-index:9999; display:none; align-items:center; justify-content:center;
-    pointer-events:none;
-  }
-  .overlay.show{display:flex; pointer-events:auto}
-  #matrixCanvas{position:fixed;inset:0;z-index:9998;mix-blend-mode:screen;opacity:0.95}
-  .core-flare{position:fixed;inset:0;background:radial-gradient(circle at center, rgba(255,90,90,0.18), transparent 30%);z-index:9997;opacity:0.95}
-
-  /* ---------- popup toast ---------- */
-  .toast{
-    position:fixed; left:20px; bottom:26px; z-index:6000; min-width:260px;
-    background:linear-gradient(90deg,var(--pink),var(--accent-b)); color:#031523; padding:12px 16px;border-radius:12px;font-weight:700;
-    box-shadow:0 12px 32px rgba(0,0,0,0.45);
-  }
-
-  /* ---------- footer ---------- */
-  footer{max-width:980px;margin:36px auto 80px;padding:12px 20px;text-align:center;color:var(--muted)}
-  footer .crafted{font-weight:700; color:linear-gradient(90deg,var(--pink),var(--accent-a))}
-  /* small niceties */
-  .muted{color:var(--muted)}
-  .hint{font-size:0.9rem;color:var(--muted);margin-top:8px}
-
-  /* focus glow */
-  .focus-glow:focus{box-shadow:0 6px 28px rgba(100,160,240,0.08), inset 0 1px 0 rgba(255,255,255,0.02)}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MindMirror X — Neural Vibes</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Matrix overlay (hidden until egg) -->
-  <canvas id="matrixCanvas" style="display:none"></canvas>
-  <div id="coreOverlay" class="overlay" style="display:none;">
-    <div class="core-flare"></div>
-  </div>
+  <canvas id="bg-canvas"></canvas>
 
-  <header>
-    <div class="brand">
-      <div class="logo">MM</div>
-      <div>
-        <h1>MindMirror X</h1>
-        <p class="lead">A living mirror for your mood — speak, type or listen.</p>
-      </div>
-    </div>
-  </header>
+  <main class="app">
+    <header class="hero">
+      <div class="hero-left">
+        <h1 class="brand">MindMirror X</h1>
+        <p class="subtitle">A living mirror for your mood — speak, type or listen.</p>
 
-  <main>
-    <div class="grid">
-      <!-- left: main -->
-      <div>
-        <div class="card composer">
-          <label class="small muted">Type how you feel…</label>
-          <textarea id="txt" class="input focus-glow" placeholder="e.g. I'm tired and anxious about exams..."></textarea>
-
+        <div class="input-block">
+          <textarea id="txtInput" placeholder="Type how you feel..."></textarea>
           <div class="controls">
-            <button id="talkBtn" class="btn">🎤 Talk</button>
-            <button id="reflectBtn" class="btn secondary">🔍 Reflect</button>
-
-            <div style="flex:1"></div>
-
-            <div class="quick-tags">
-              <div class="tag" data-val="Happy">Happy</div>
-              <div class="tag" data-val="Anxious">Anxious</div>
-              <div class="tag" data-val="Neutral">Neutral</div>
-            </div>
+            <button id="btnVoice" title="Double-click anywhere to start voice">🎙️ Talk</button>
+            <button id="btnSend">🔍 Reflect</button>
+            <span id="status" class="status">idle</span>
           </div>
-
-          <div class="spectrum">
-            <div class="meter"><div id="fill" class="fill" style="width:28%"></div></div>
-            <div class="label small muted">Emotion Spectrum</div>
-          </div>
-
-          <div id="reflectionText" class="reflection-area muted"></div>
-
-          <div class="hint">Tip: say <code>reflect</code> to analyze, or say <code>diagnose</code> to summarize session.</div>
         </div>
 
-        <div class="card" style="margin-top:18px">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div><strong>Recent reflections</strong><div class="small muted">session only</div></div>
-            <div id="insightBtn" class="small muted" style="cursor:pointer">Clear</div>
-          </div>
-          <div id="logs" class="logs"></div>
+        <div class="quick">
+          <button class="quick-btn" data-sample="I'm feeling happy and optimistic today.">Happy</button>
+          <button class="quick-btn" data-sample="I am anxious and tired, need calm.">Anxious</button>
+          <button class="quick-btn" data-sample="I feel neutral, just floating.">Neutral</button>
         </div>
       </div>
 
-      <!-- right: aside -->
-      <aside class="aside">
-        <div class="card">
-          <div style="display:flex;gap:12px;align-items:center">
-            <div style="width:46px;height:46px;border-radius:10px;background:linear-gradient(90deg,var(--accent-b),var(--accent-a))"></div>
-            <div>
-              <div style="font-weight:700">Lex-01</div>
-              <div class="small muted">Abhi's friendly assistant</div>
-            </div>
+      <aside class="hero-right">
+        <div class="visual-card">
+          <div id="pulse" class="pulse"></div>
+          <div class="viz-header">Emotion Spectrum</div>
+          <div id="spectrum" class="spectrum">
+            <div class="bar" id="bar-positive"><div class="bar-fill"></div></div>
+            <div class="bar" id="bar-neutral"><div class="bar-fill"></div></div>
+            <div class="bar" id="bar-negative"><div class="bar-fill"></div></div>
           </div>
-
-          <div style="margin-top:14px">
-            <div class="small muted">System Clock</div>
-            <div id="clock" style="font-weight:700;margin-top:6px;font-size:1.25rem">--:--:--</div>
-
-            <div class="small muted" style="margin-top:12px">Uptime</div>
-            <div id="uptime" style="font-weight:700;margin-top:6px">0d 0h 0m</div>
-          </div>
-
-          <div style="margin-top:14px">
-            <button id="voiceToggle" class="btn" style="width:100%">🎧 Voice commands: <span id="vcState">Off</span></button>
-          </div>
-
-          <div style="margin-top:12px" class="small muted">
-            Tip: Speak "abhi", "matrix", "system core" or "diagnose" — try it!
-          </div>
+          <div id="reply" class="reply">Say something or type — I’ll mirror it.</div>
+          <div id="mem-count" class="mem">Memories: <span id="memnum">0</span></div>
         </div>
       </aside>
-    </div>
+    </header>
+
+    <section class="history" id="history">
+      <h2>Recent reflections</h2>
+      <div id="mem-list" class="mem-list">No memories yet — reflect and save.</div>
+    </section>
+
+    <footer class="site-footer">crafted with 💖 by Abhi</footer>
   </main>
 
-  <footer>
-    © 2025 — crafted with 💖 by Abhi
-  </footer>
-
-  <!-- toast -->
-  <div id="toast" class="toast" style="display:none"></div>
-
-<script>
-/* =================
-   MindMirror X v2.0
-   Single-file -> copy/paste
-   Real-time session only (no persisted storage)
-   ==================*/
-
-(() => {
-  // ---------------- state ----------------
-  const reflections = []; // session-only
-  let recognition, listening=false;
-  let uptimeStart = Date.now();
-
-  // DOM refs
-  const txt = document.getElementById('txt');
-  const talkBtn = document.getElementById('talkBtn');
-  const reflectBtn = document.getElementById('reflectBtn');
-  const logsEl = document.getElementById('logs');
-  const fillEl = document.getElementById('fill');
-  const reflectionText = document.getElementById('reflectionText');
-  const clockEl = document.getElementById('clock');
-  const uptimeEl = document.getElementById('uptime');
-  const toast = document.getElementById('toast');
-  const voiceToggle = document.getElementById('voiceToggle');
-  const vcState = document.getElementById('vcState');
-  const matrixCanvas = document.getElementById('matrixCanvas');
-  const coreOverlay = document.getElementById('coreOverlay');
-  const insightBtn = document.getElementById('insightBtn');
-
-  // ---------------- utilities ----------------
-  function speak(text, opts={rate:1,pitch:1}) {
-    try {
-      const s = new SpeechSynthesisUtterance(text);
-      s.rate = opts.rate; s.pitch = opts.pitch; s.lang = 'en-US';
-      window.speechSynthesis.cancel(); // flush
-      window.speechSynthesis.speak(s);
-    } catch(e){ console.warn('speak failed', e) }
-  }
-  function toastMsg(t, time=3500){
-    toast.innerText = t; toast.style.display='block';
-    setTimeout(()=>{ toast.style.display='none' }, time);
-  }
-  function logLine(line){
-    const time = new Date().toLocaleTimeString();
-    logsEl.innerHTML = `<div>[${time}] ${escapeHtml(line)}</div>` + logsEl.innerHTML;
-  }
-  function escapeHtml(s){ return (''+s).replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
-
-  // ---------------- mood analysis (simple heuristics) ----------------
-  function analyzeText(t){
-    // very lightweight sentiment-like heuristics for demo only
-    const low = ['sad','tired','lonely','anxious','depressed','down','angry','stressed'];
-    const high = ['happy','excited','good','great','awesome','joy','love','relaxed'];
-    const text = t.toLowerCase();
-    let score = 50; // 0..100 (higher = positive)
-    low.forEach(w=>{ if(text.includes(w)) score -= 12 });
-    high.forEach(w=>{ if(text.includes(w)) score += 12 });
-    // intensity by punctuation
-    const ex = (text.match(/[!?]/g)||[]).length;
-    score += Math.min(10, ex*4);
-    score = Math.max(5, Math.min(95, score));
-    return {score,summary: summarizeScore(score)};
-  }
-  function summarizeScore(score){
-    if(score >= 75) return "You're upbeat and balanced — keep going!";
-    if(score >= 52) return "You're balanced. A quiet moment might help.";
-    if(score >= 30) return "You're a bit low — small self-care could help.";
-    return "You seem down. Consider reaching out to someone you trust.";
-  }
-
-  // ---------------- UI update ----------------
-  function addReflection(text, source='manual'){
-    const res = analyzeText(text);
-    reflections.unshift({text,score:res.score,summary:res.summary,ts:Date.now(),source});
-    updateUI();
-    logLine(`${source.toUpperCase()} reflection: ${text}`);
-    speakShortHint(res.summary);
-  }
-  function updateUI(){
-    // show most recent reflection
-    if(reflections.length>0){
-      const r = reflections[0];
-      reflectionText.innerText = `"${r.text}"\n\n${r.summary}`;
-      const w = Math.max(6, Math.min(95, r.score));
-      fillEl.style.width = w + '%';
-    } else {
-      reflectionText.innerText = "No reflections yet — speak or type to begin.";
-      fillEl.style.width = '20%';
-    }
-    // logs already updated by logLine
-  }
-  function speakShortHint(summary){
-    // speak but short
-    speak(summary, {rate:1, pitch:1});
-  }
-
-  // ---------------- voice recognition ----------------
-  function initRecognition(){
-    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if(!SpeechRec) return null;
-    const r = new SpeechRec();
-    r.lang = 'en-US';
-    r.interimResults = false;
-    r.maxAlternatives = 1;
-    r.continuous = false;
-    r.onresult = (ev) => {
-      const spoken = ev.results[0][0].transcript;
-      logLine(`voice → ${spoken}`);
-      handleSpoken(spoken);
-    };
-    r.onerror = (ev) => { logLine('voice error: '+(ev.error||ev.message)); }
-    r.onend = ()=> {
-      listening=false; updateVoiceUI();
-    };
-    return r;
-  }
-  function toggleListening(){
-    if(!recognition) { toastMsg('Voice recognition not available'); return; }
-    if(listening){ recognition.stop(); listening=false; updateVoiceUI(); return; }
-    try { recognition.start(); listening=true; updateVoiceUI(); } catch(e){ listening=false; updateVoiceUI(); }
-  }
-  function updateVoiceUI(){ vcState.innerText = listening ? 'On' : 'Off'; voiceToggle.classList.toggle('active', listening); }
-
-  // ---------------- handle spoken commands ----------------
-  function handleSpoken(spoken){
-    const text = spoken.trim().toLowerCase();
-    // special voice commands
-    if(text.includes('diagnose') || text.includes('/diagnose') ){
-      runDiagnose();
-      return;
-    }
-    if(text.includes('reflect')){
-      reflectAction();
-      return;
-    }
-    if(text.includes('matrix')){ startMatrix(); toastMsg('Matrix mode enabled'); return; }
-    if(text.includes('system core') || text.includes('core')){ startCore(); toastMsg('Core mode: warming up'); return; }
-    if(text.includes('abhi')){ const m = 'Hello — Lex-01 reports: System initialized by Abhi.'; speak(m); logLine(m); toastMsg('Hello Abhi 👋'); return; }
-
-    // otherwise treat as reflection content
-    txt.value = spoken;
-    addReflection(spoken,'voice');
-  }
-
-  // ---------------- actions ----------------
-  function reflectAction(){
-    const t = txt.value.trim();
-    if(!t){ toastMsg('Type or speak some text first'); return; }
-    addReflection(t,'manual');
-    txt.value='';
-  }
-
-  function runDiagnose(){
-    if(reflections.length===0){ toastMsg('No reflections to diagnose'); speak('No reflections yet'); return; }
-    // analyze last up to 10
-    const take = reflections.slice(0,10);
-    const avg = Math.round(take.reduce((s,r)=>s+r.score,0)/take.length);
-    const summary = summarizeScore(avg);
-    const message = `Diagnosis: over recent reflections your average mood is ${avg} out of 100. ${summary}`;
-    logLine('DIAGNOSE: ' + message);
-    toastMsg('Diagnosis complete');
-    speak(message);
-    // also show a brief boxed insight
-    reflectionText.innerText = message;
-  }
-
-  // ---------------- uptime + clock ----------------
-  function tickClock(){
-    const d = new Date();
-    clockEl.innerText = d.toLocaleTimeString();
-    const diff = Date.now() - uptimeStart;
-    const secs = Math.floor(diff/1000), mins=Math.floor(secs/60), hrs=Math.floor(mins/60), days=Math.floor(hrs/24);
-    uptimeEl.innerText = `${days}d ${hrs%24}h ${mins%60}m`;
-  }
-
-  // ------------- matrix overlay (simple effect) ----------
-  let matrixRunning=false, matrixCtx, matrixCols, matrixInterval;
-  function startMatrix(){
-    if(matrixRunning) return;
-    matrixCanvas.style.display='block';
-    matrixRunning=true;
-    const canvas = matrixCanvas;
-    canvas.width = innerWidth; canvas.height = innerHeight;
-    matrixCtx = canvas.getContext('2d');
-    const fontSize = 14;
-    matrixCols = Math.floor(canvas.width / fontSize);
-    const drops = new Array(matrixCols).fill(1);
-    matrixInterval = setInterval(()=>{
-      matrixCtx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-      matrixCtx.fillRect(0,0,canvas.width,canvas.height);
-      matrixCtx.fillStyle = '#00FF66';
-      matrixCtx.font = fontSize + 'px monospace';
-      for(let i=0;i<drops.length;i++){
-        const text = String.fromCharCode(33 + Math.random()*90);
-        matrixCtx.fillText(text, i*fontSize, drops[i]*fontSize);
-        if(drops[i]*fontSize > canvas.height && Math.random()>0.975) drops[i]=0;
-        drops[i]++;
-      }
-    }, 45);
-    // stop after 18s
-    setTimeout(stopMatrix, 18000);
-  }
-  function stopMatrix(){
-    if(!matrixRunning) return;
-    clearInterval(matrixInterval); matrixRunning=false;
-    matrixCanvas.style.display='none';
-    // clear canvas
-    matrixCtx && matrixCtx.clearRect(0,0,matrixCanvas.width,matrixCanvas.height);
-  }
-
-  // ---------------- core overlay (red flare) --------------
-  let coreTimer;
-  function startCore(){
-    coreOverlay.style.display='block';
-    coreOverlay.classList.add('show');
-    speak('Warning: Core overload simulation.');
-    clearTimeout(coreTimer);
-    coreTimer = setTimeout(()=> {
-      coreOverlay.style.display='none';
-      coreOverlay.classList.remove('show');
-    }, 16000);
-  }
-
-  // ---------------- init speech recognition if supported -------------
-  function tryInitRecognition(){
-    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if(!SpeechRec) return null;
-    try{
-      recognition = new SpeechRec();
-      recognition.lang='en-US'; recognition.interimResults=false; recognition.maxAlternatives=1;
-      recognition.onresult = (e)=> {
-        const s = e.results[0][0].transcript;
-        handleSpoken(s);
-      };
-      recognition.onerror = (ev)=> logLine('Speech error: '+(ev.error||ev.message));
-      recognition.onend = ()=> { listening=false; updateVoiceUI(); };
-      return recognition;
-    }catch(e){
-      console.warn('no recognition', e); return null;
-    }
-  }
-
-  // ---------------- small helpers & events -------------
-  function setup(){
-    // init clock
-    tickClock(); setInterval(tickClock, 1000);
-
-    // voice
-    recognition = tryInitRecognition();
-
-    talkBtn.addEventListener('click', ()=> {
-      if(!recognition){ toastMsg('Voice not supported in this browser'); return; }
-      toggleListening();
-      if(!listening){ // start
-        try{ recognition.start(); listening=true; updateVoiceUI(); }catch(e){}
-      } else {
-        recognition.stop(); listening=false; updateVoiceUI();
-      }
-    });
-
-    reflectBtn.addEventListener('click', reflectAction);
-
-    // quick tags
-    document.querySelectorAll('.tag').forEach(t => {
-      t.addEventListener('click', ()=> {
-        txt.value = t.dataset.val + ' ';
-      });
-    });
-
-    // voice toggle button
-    voiceToggle.addEventListener('click', ()=> { toggleListening(); });
-
-    // clear logs
-    insightBtn.addEventListener('click', ()=> {
-      logsEl.innerHTML=''; reflections.length=0; updateUI(); toastMsg('Session cleared');
-    });
-
-    // keyboard enter -> reflect
-    txt.addEventListener('keydown', (e)=> {
-      if(e.key === 'Enter' && (e.ctrlKey||e.metaKey)){
-        reflectAction();
-        e.preventDefault();
-      }
-    });
-
-    // handle direct text commands starting with '/'
-    reflectBtn.addEventListener('dblclick', ()=> { runDiagnose(); });
-
-    // simple input command parser when pressing reflect
-    reflectBtn.addEventListener('contextmenu', (ev)=> {
-      ev.preventDefault(); runDiagnose();
-    });
-
-    // register spoken key shortcuts (for easter eggs)
-    window.addEventListener('keydown', (ev)=> {
-      if(ev.key === 'm' && ev.ctrlKey){ startMatrix(); toastMsg('matrix triggered (ctrl+m)') }
-      if(ev.key === 'k' && ev.ctrlKey){ startCore(); toastMsg('core triggered (ctrl+k)') }
-    });
-
-    // initial text guidance
-    updateUI();
-    logLine('MindMirror X v2.0 initialized');
-
-    // sample friendly greeting voice
-    speak('Hi, I am Lex zero one, your Mind Mirror. Speak or type when ready.');
-  }
-
-  // ---------------- run on load -------------
-  setup();
-
-  // Expose small API to console for debugging
-  window.MM = { addReflection, reflections, speak, startMatrix, stopMatrix, startCore };
-
-})();
-</script>
+  <script src="script.js"></script>
 </body>
 </html>
