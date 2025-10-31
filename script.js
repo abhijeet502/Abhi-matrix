@@ -3,7 +3,7 @@
    - Double-click anywhere to start voice recording (SpeechRecognition)
 */
 
-const API_BASE = "https://REPLACE_WITH_YOUR_BACKEND_URL"; // <-- PUT your backend URL here, e.g. https://mindmirrorx.onrender.com
+const API_BASE = "https://mindmirrorx-backend.onrender.com"; 
 
 /* ---------- Simple DOM refs ---------- */
 const txt = document.getElementById('txtInput');
