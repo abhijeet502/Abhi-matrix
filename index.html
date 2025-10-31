@@ -3,32 +3,34 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>MindMirror X — Neural Reflections</title>
+  <title>MindMirror X — Neural Vibes</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <!-- Canvas background for particles & parallax -->
   <canvas id="bg-canvas"></canvas>
 
   <main class="app">
     <header class="hero">
       <div class="hero-left">
         <h1 class="brand">MindMirror X</h1>
-        <p class="subtitle">A living mirror for your emotions — speak, type, or feel.</p>
+        <p class="subtitle">A living mirror for your mood — speak, type or listen.</p>
 
         <div class="input-block">
           <textarea id="txtInput" placeholder="Type how you feel..."></textarea>
           <div class="controls">
-            <button id="btnVoice">🎙️ Speak</button>
-            <button id="btnSend">✨ Reflect</button>
+            <button id="btnVoice" title="Double-click anywhere to start voice">🎙️ Talk</button>
+            <button id="btnSend">🔍 Reflect</button>
             <span id="status" class="status">idle</span>
           </div>
         </div>
 
         <div class="quick">
-          <button class="quick-btn" data-sample="I'm feeling creative and inspired.">Creative</button>
-          <button class="quick-btn" data-sample="I'm feeling sad and need comfort.">Sad</button>
-          <button class="quick-btn" data-sample="I'm just calm and neutral.">Calm</button>
+          <button class="quick-btn" data-sample="I'm feeling happy and optimistic today.">Happy</button>
+          <button class="quick-btn" data-sample="I am anxious and tired, need calm.">Anxious</button>
+          <button class="quick-btn" data-sample="I feel neutral, just floating.">Neutral</button>
         </div>
+
       </div>
 
       <aside class="hero-right">
@@ -36,19 +38,19 @@
           <div id="pulse" class="pulse"></div>
           <div class="viz-header">Emotion Spectrum</div>
           <div id="spectrum" class="spectrum">
-            <div class="bar" id="bar-positive"><div class="bar-fill"></div></div>
-            <div class="bar" id="bar-neutral"><div class="bar-fill"></div></div>
-            <div class="bar" id="bar-negative"><div class="bar-fill"></div></div>
+            <div class="bar" id="bar-positive"><div class="bar-fill" style="width:0%"></div></div>
+            <div class="bar" id="bar-neutral"><div class="bar-fill" style="width:0%"></div></div>
+            <div class="bar" id="bar-negative"><div class="bar-fill" style="width:0%"></div></div>
           </div>
-          <div id="reply" class="reply">Type or speak — I’ll reflect your inner voice.</div>
+          <div id="reply" class="reply">Say something or type — I’ll mirror it.</div>
           <div id="mem-count" class="mem">Memories: <span id="memnum">0</span></div>
         </div>
       </aside>
     </header>
 
     <section class="history" id="history">
-      <h2>Recent Reflections</h2>
-      <div id="mem-list" class="mem-list">No reflections yet — share your thoughts.</div>
+      <h2>Recent reflections</h2>
+      <div id="mem-list" class="mem-list">No memories yet — reflect and save.</div>
     </section>
 
     <footer class="site-footer">crafted with 💖 by Abhi</footer>
@@ -57,3 +59,4 @@
   <script src="script.js"></script>
 </body>
 </html>
+        
