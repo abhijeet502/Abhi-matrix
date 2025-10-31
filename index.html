@@ -3,167 +3,59 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>AURORA OS — Crafted with 💖 by Abhi</title>
-
-  <!-- libs (CDN) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.153.0/three.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
-  <!-- styles -->
+  <title>MindMirror X — Neural Vibes</title>
   <link rel="stylesheet" href="style.css" />
 </head>
-<body class="theme-aurora">
+<body>
+  <!-- Canvas background for particles & parallax -->
+  <canvas id="bg-canvas"></canvas>
 
-  <!-- BOOT SCREEN -->
-  <div id="boot-screen" aria-hidden="false">
-    <div class="boot-inner">
-      <div class="brand-large">
-        <div class="logo-dot"></div>
-        <div class="brand-text">AURORA OS</div>
+  <main class="app">
+    <header class="hero">
+      <div class="hero-left">
+        <h1 class="brand">MindMirror X</h1>
+        <p class="subtitle">A living mirror for your mood — speak, type or listen.</p>
+
+        <div class="input-block">
+          <textarea id="txtInput" placeholder="Type how you feel..."></textarea>
+          <div class="controls">
+            <button id="btnVoice" title="Double-click anywhere to start voice">🎙️ Talk</button>
+            <button id="btnSend">🔍 Reflect</button>
+            <span id="status" class="status">idle</span>
+          </div>
+        </div>
+
+        <div class="quick">
+          <button class="quick-btn" data-sample="I'm feeling happy and optimistic today.">Happy</button>
+          <button class="quick-btn" data-sample="I am anxious and tired, need calm.">Anxious</button>
+          <button class="quick-btn" data-sample="I feel neutral, just floating.">Neutral</button>
+        </div>
+
       </div>
-      <div class="boot-msg">Initializing subsystems…</div>
-      <div class="boot-bar"><div id="boot-progress"></div></div>
-      <div class="boot-sub">Crafted with 💖 by Abhi</div>
-    </div>
-  </div>
 
-  <!-- APP SHELL -->
-  <div id="app" aria-hidden="true">
-    <nav class="topbar glass" role="navigation">
-      <div class="brand">
-        <div class="logo-dot"></div>
-        <div>
-          <div class="title">AURORA OS</div>
-          <div class="subtitle">Living Interface — Abhi</div>
-        </div>
-      </div>
-
-      <div class="controls" role="menubar" aria-label="controls">
-        <button id="voice-btn" class="control-btn" aria-pressed="false" title="Voice (Alt+V)">🎙️ Talk</button>
-        <select id="theme-select" class="control-select" title="Theme selector">
-          <option value="aurora">Aurora</option>
-          <option value="glass">Glass</option>
-          <option value="midnight">Midnight</option>
-          <option value="ocean">Ocean</option>
-        </select>
-        <button id="settings-btn" class="control-btn" title="Settings">⚙️</button>
-      </div>
-    </nav>
-
-    <main class="main-grid" role="main">
-      <!-- Left column: Core 3D + node map -->
-      <section class="panel glass core-panel" aria-labelledby="coreHeading">
-        <h2 id="coreHeading">System Core</h2>
-        <div id="core-canvas-wrap">
-          <canvas id="three-canvas" aria-hidden="true"></canvas>
-        </div>
-
-        <div class="core-row">
-          <div class="core-status">
-            <div>Mode: <strong id="core-mode">Idle</strong></div>
-            <div id="uptime">Uptime: —</div>
+      <aside class="hero-right">
+        <div class="visual-card">
+          <div id="pulse" class="pulse"></div>
+          <div class="viz-header">Emotion Spectrum</div>
+          <div id="spectrum" class="spectrum">
+            <div class="bar" id="bar-positive"><div class="bar-fill" style="width:0%"></div></div>
+            <div class="bar" id="bar-neutral"><div class="bar-fill" style="width:0%"></div></div>
+            <div class="bar" id="bar-negative"><div class="bar-fill" style="width:0%"></div></div>
           </div>
-          <div class="core-controls">
-            <div id="voice-level" class="level-indicator" aria-hidden="true"><span></span></div>
-            <button id="btn-boot-sound" class="mini-btn">🔊 Boot sound</button>
-          </div>
+          <div id="reply" class="reply">Say something or type — I’ll mirror it.</div>
+          <div id="mem-count" class="mem">Memories: <span id="memnum">0</span></div>
         </div>
+      </aside>
+    </header>
 
-        <div class="node-map glass" id="node-map" aria-hidden="false">
-          <svg viewBox="0 0 400 140" preserveAspectRatio="xMidYMid meet" id="node-svg" role="img" aria-label="node map"></svg>
-        </div>
-      </section>
+    <section class="history" id="history">
+      <h2>Recent reflections</h2>
+      <div id="mem-list" class="mem-list">No memories yet — reflect and save.</div>
+    </section>
 
-      <!-- Middle column: Metrics & graphs -->
-      <section class="panel glass metrics-panel" aria-labelledby="metricsHeading">
-        <h2 id="metricsHeading">Live Monitor</h2>
+    <footer class="site-footer">crafted with 💖 by Abhi</footer>
+  </main>
 
-        <div class="metrics-row">
-          <div class="metric">
-            <div class="metric-label">CPU</div>
-            <div class="metric-value" id="cpu-value">—%</div>
-            <div class="metric-bar"><div id="cpu-bar"></div></div>
-          </div>
-          <div class="metric">
-            <div class="metric-label">RAM</div>
-            <div class="metric-value" id="ram-value">—%</div>
-            <div class="metric-bar"><div id="ram-bar"></div></div>
-          </div>
-          <div class="metric">
-            <div class="metric-label">AI Load</div>
-            <div class="metric-value" id="ai-value">—%</div>
-            <div class="metric-bar"><div id="ai-bar"></div></div>
-          </div>
-        </div>
-
-        <div class="charts">
-          <div class="chart-wrap"><canvas id="cpuChart" aria-label="cpu chart"></canvas></div>
-          <div class="chart-wrap"><canvas id="ramChart" aria-label="ram chart"></canvas></div>
-        </div>
-
-        <div class="controls-row">
-          <button id="export-logs" class="control-pill">⬇️ Export logs</button>
-          <button id="clear-logs" class="control-pill danger">🧹 Clear logs</button>
-        </div>
-      </section>
-
-      <!-- Right column: Terminal & chat -->
-      <section class="panel glass terminal-panel" aria-labelledby="termHeading">
-        <h2 id="termHeading">Terminal & Chat</h2>
-
-        <div class="terminal-top">
-          <div class="term-title">System Terminal</div>
-          <div class="term-actions">
-            <button id="reboot-btn" class="small-btn">Reboot</button>
-            <button id="matrix-btn" class="small-btn">Matrix</button>
-          </div>
-        </div>
-
-        <div id="log" class="log-area" role="log" aria-live="polite"></div>
-
-        <div class="chat-row">
-          <input id="cmd-input" aria-label="command" placeholder="Type a command or ask LucidCore..." />
-          <button id="cmd-send" class="send-btn">Send</button>
-        </div>
-
-        <div class="chat-hint">Hotkeys: <kbd>Alt+V</kbd> voice, <kbd>Alt+R</kbd> reboot</div>
-      </section>
-    </main>
-
-    <footer class="footer glass" role="contentinfo">
-      <div class="footer-left">Crafted with 💖 by Abhi</div>
-      <div class="footer-right" id="clock">—</div>
-    </footer>
-
-    <!-- overlay for visual effects -->
-    <div id="visual-overlay" aria-hidden="true"></div>
-
-    <!-- settings modal -->
-    <div id="settings-modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
-      <div class="modal-inner glass">
-        <h3>Settings</h3>
-        <label>Display name
-          <input id="setting-name" placeholder="Your name (saved locally)" />
-        </label>
-        <label>Animation intensity
-          <input id="setting-intensity" type="range" min="0" max="100" value="60" />
-        </label>
-        <div class="modal-actions">
-          <button id="save-settings" class="control-pill">Save</button>
-          <button id="close-settings" class="control-pill">Close</button>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- audio placeholders (you can add actual mp3s in public/sounds and enable) -->
-  <audio id="boot-sound" preload="auto"></audio>
-  <audio id="glitch-sound" preload="auto"></audio>
-  <audio id="ambient-sound" preload="auto"></audio>
-
-  <!-- main script -->
   <script src="script.js"></script>
 </body>
 </html>
