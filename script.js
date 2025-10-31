@@ -11,7 +11,7 @@ const statusEl = document.getElementById("status");
 let recognition;
 let memories = [];
 
-// --- Initialize Speech Recognition ---
+// --- Speech Recognition ---
 if ("webkitSpeechRecognition" in window) {
   recognition = new webkitSpeechRecognition();
   recognition.continuous = false;
@@ -28,7 +28,7 @@ if ("webkitSpeechRecognition" in window) {
   btnVoice.textContent = "Voice N/A";
 }
 
-// --- Send text to backend + get emotion ---
+// --- Process Input ---
 async function processInput(text) {
   if (!text.trim()) return;
   reply.textContent = "Reflecting...";
@@ -45,45 +45,45 @@ async function processInput(text) {
     const { mood, advice } = data;
 
     updateSpectrum(mood);
-    reply.textContent = advice || "I reflected but didn’t find anything.";
+    reply.textContent = advice || "I couldn’t interpret that.";
 
     memories.push({ mood, text, advice });
     memNum.textContent = memories.length;
     renderMemories();
 
-    // Voice reply (TTS)
-    const speech = new SpeechSynthesisUtterance(advice || "Here's my reflection.");
-    speech.lang = "en-US";
-    speech.pitch = 1;
-    speech.rate = 1;
-    window.speechSynthesis.speak(speech);
+    // Voice reply
+    const utter = new SpeechSynthesisUtterance(advice);
+    utter.lang = "en-US";
+    utter.rate = 1;
+    utter.pitch = 1;
+    speechSynthesis.speak(utter);
 
-  } catch (err) {
-    reply.textContent = "Error connecting to MindMirror Core.";
+  } catch {
+    reply.textContent = "⚠️ Connection error — check backend.";
   } finally {
     statusEl.textContent = "idle";
   }
 }
 
-// --- Visual spectrum update ---
+// --- Visual Spectrum Update ---
 function updateSpectrum(mood) {
   const positive = document.querySelector("#bar-positive .bar-fill");
   const neutral = document.querySelector("#bar-neutral .bar-fill");
   const negative = document.querySelector("#bar-negative .bar-fill");
 
-  positive.style.width = mood === "positive" ? "100%" : "20%";
-  neutral.style.width = mood === "neutral" ? "100%" : "20%";
-  negative.style.width = mood === "negative" ? "100%" : "20%";
+  positive.style.width = mood === "positive" ? "100%" : "10%";
+  neutral.style.width = mood === "neutral" ? "100%" : "10%";
+  negative.style.width = mood === "negative" ? "100%" : "10%";
 
-  document.getElementById("pulse").style.background = 
+  document.getElementById("pulse").style.background =
     mood === "positive"
-      ? "radial-gradient(circle, #00ff99, #006644)"
+      ? "radial-gradient(circle, #00ffcc, #003333)"
       : mood === "negative"
-      ? "radial-gradient(circle, #ff4d4d, #660000)"
-      : "radial-gradient(circle, #3399ff, #003366)";
+      ? "radial-gradient(circle, #ff6666, #330000)"
+      : "radial-gradient(circle, #3399ff, #001133)";
 }
 
-// --- Render Memories ---
+// --- Memories ---
 function renderMemories() {
   memList.innerHTML = memories
     .map(
@@ -102,3 +102,36 @@ btnVoice.addEventListener("click", () => recognition?.start());
 document.querySelectorAll(".quick-btn").forEach((btn) =>
   btn.addEventListener("click", () => processInput(btn.dataset.sample))
 );
+
+// --- Particle Background ---
+const canvas = document.getElementById("bg-canvas");
+const ctx = canvas.getContext("2d");
+let w, h, particles;
+function init() {
+  w = canvas.width = window.innerWidth;
+  h = canvas.height = window.innerHeight;
+  particles = Array.from({ length: 90 }, () => ({
+    x: Math.random() * w,
+    y: Math.random() * h,
+    r: Math.random() * 2 + 1,
+    dx: Math.random() * 0.5 - 0.25,
+    dy: Math.random() * 0.5 - 0.25,
+  }));
+}
+function draw() {
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = "rgba(0, 255, 150, 0.7)";
+  particles.forEach((p) => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fill();
+    p.x += p.dx;
+    p.y += p.dy;
+    if (p.x < 0 || p.x > w) p.dx *= -1;
+    if (p.y < 0 || p.y > h) p.dy *= -1;
+  });
+  requestAnimationFrame(draw);
+}
+window.addEventListener("resize", init);
+init();
+draw();
